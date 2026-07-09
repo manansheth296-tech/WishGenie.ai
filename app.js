@@ -304,9 +304,15 @@ class App {
     this.genieOrb = document.querySelector('.genie-orb');
     this.genieDialogueText = document.getElementById('genie-dialogue-text');
     this.genieStatusText = document.getElementById('genie-status-text');
-    this.historyList = document.querySelector('.history-list');
-    this.historyEmpty = document.querySelector('.history-empty');
-    this.wishCount = document.getElementById('wish-count');
+    
+    // Tome Elements
+    this.btnTome = document.getElementById('btn-tome');
+    this.tomeOverlay = document.getElementById('tome-overlay');
+    this.tomeClose = document.querySelector('.tome-close');
+    this.tomeStatCount = document.getElementById('tome-stat-count');
+    this.tomeStatLoopholes = document.getElementById('tome-stat-loopholes');
+    this.tomeHistoryList = document.querySelector('.tome-history-list');
+    this.tomeEmptyState = document.querySelector('.tome-empty-state');
     
     // Modals & Overlays
     this.settingsModal = document.getElementById('settings-modal');
@@ -355,6 +361,18 @@ class App {
         e.preventDefault();
         this.btnCast.click();
       }
+    });
+
+    // Tome Event Listeners
+    this.btnTome.addEventListener('click', () => {
+      this.sounds.playClick();
+      this.sounds.playRub(); // Play rub sound as paper slide effect
+      this.tomeOverlay.classList.add('active');
+    });
+    
+    this.tomeClose.addEventListener('click', () => {
+      this.sounds.playClick();
+      this.tomeOverlay.classList.remove('active');
     });
   }
 
@@ -421,6 +439,7 @@ class App {
     this.state = 'DIALOG';
     this.introScreen.classList.remove('active');
     this.dialogScreen.classList.add('active');
+    this.btnTome.style.display = 'flex';
     
     // Fade out smoke
     setTimeout(() => {
@@ -649,30 +668,32 @@ Keep your responses dramatic, theatrical, and concise. Do not output anything ot
   addHistoryItem(wishText, outcome) {
     this.wishes.push({ wishText, outcome });
     
-    this.historyEmpty.style.display = 'none';
-    this.wishCount.textContent = this.wishes.length;
+    this.tomeEmptyState.style.display = 'none';
+    this.tomeStatCount.textContent = this.wishes.length;
+    
+    const loopholeCount = this.wishes.filter(w => w.outcome.status === 'loophole').length;
+    this.tomeStatLoopholes.textContent = loopholeCount;
     
     const li = document.createElement('li');
-    li.className = 'wish-log-item';
+    li.className = 'tome-wish-item';
     
     if (outcome.status === 'perfect') {
       li.style.borderColor = 'var(--primary-gold)';
-      li.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.15)';
       li.innerHTML = `
-        <div class="wish-log-text">✨ <span>Wish:</span> ${this.escapeHTML(wishText)}</div>
-        <div class="wish-log-outcome" style="color:var(--primary-gold)"><strong>Granted (Perfect):</strong> ${this.escapeHTML(outcome.granted)}</div>
-        <div class="wish-log-outcome" style="font-style:italic">"${this.escapeHTML(outcome.genie_commentary)}"</div>
+        <div class="tome-wish-text">✨ <span>Wish:</span> ${this.escapeHTML(wishText)}</div>
+        <div class="tome-wish-outcome" style="color:#5a2e05"><strong>Granted (Perfect):</strong> ${this.escapeHTML(outcome.granted)}</div>
+        <div class="tome-wish-outcome" style="font-style:italic; color:#70563b">"${this.escapeHTML(outcome.genie_commentary)}"</div>
       `;
     } else {
       li.innerHTML = `
-        <div class="wish-log-text">🔮 <span>Wish:</span> ${this.escapeHTML(wishText)}</div>
-        <div class="wish-log-outcome"><strong>Granted:</strong> ${this.escapeHTML(outcome.granted)}</div>
-        <div class="wish-log-but"><strong>BUT:</strong> ${this.escapeHTML(outcome.but)}</div>
-        <div class="wish-log-outcome" style="font-style:italic; font-size:0.85rem;">"${this.escapeHTML(outcome.genie_commentary)}"</div>
+        <div class="tome-wish-text">📜 <span>Wish:</span> ${this.escapeHTML(wishText)}</div>
+        <div class="tome-wish-outcome"><strong>Granted:</strong> ${this.escapeHTML(outcome.granted)}</div>
+        <div class="tome-wish-but"><strong>BUT:</strong> ${this.escapeHTML(outcome.but)}</div>
+        <div class="tome-wish-outcome" style="font-style:italic; font-size:0.85rem; color:#70563b;">"${this.escapeHTML(outcome.genie_commentary)}"</div>
       `;
     }
     
-    this.historyList.insertBefore(li, this.historyList.firstChild);
+    this.tomeHistoryList.insertBefore(li, this.tomeHistoryList.firstChild);
   }
 
   escapeHTML(str) {

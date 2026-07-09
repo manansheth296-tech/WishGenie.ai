@@ -240,19 +240,14 @@ header {
 #dialog-screen {
   display: none;
   width: 100%;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  align-items: stretch;
+  max-width: 680px;
+  margin: 0 auto;
+  flex-direction: column;
+  gap: 20px;
 }
 
 #dialog-screen.active {
-  display: grid;
-}
-
-@media (max-width: 868px) {
-  #dialog-screen {
-    grid-template-columns: 1fr;
-  }
+  display: flex;
 }
 
 .genie-viewport {
@@ -867,4 +862,294 @@ header {
   70% { transform: translate(-8px, 6px); }
   80% { transform: translate(5px, -5px); }
   90% { transform: translate(-2px, 3px); }
+}
+
+/* Tome Overlay & Book Layout */
+.tome-container {
+  width: 90%;
+  max-width: 900px;
+  height: 80vh;
+  min-height: 500px;
+  position: relative;
+  animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.tome-close {
+  position: absolute;
+  top: -45px;
+  right: 0;
+  background: none;
+  border: none;
+  color: var(--primary-gold);
+  font-size: 2.5rem;
+  cursor: pointer;
+  transition: transform 0.3s;
+  line-height: 1;
+}
+
+.tome-close:hover {
+  transform: scale(1.2) rotate(90deg);
+  color: #fff;
+}
+
+.tome-book {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, #fcf6e8 0%, #ecdcb9 100%);
+  border: 14px solid #2d1808;
+  outline: 4px solid #5a3011;
+  border-radius: 12px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), inset 0 0 40px rgba(0,0,0,0.3);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Spine line */
+.tome-book::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 1.5px);
+  width: 3px;
+  background: linear-gradient(to right, rgba(0,0,0,0.25), rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.25));
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+
+.tome-page {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  color: #2b1d0c;
+}
+
+.tome-page-left {
+  border-right: 1px solid rgba(90, 46, 5, 0.15);
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.tome-page-right {
+  border-left: 1px solid rgba(90, 46, 5, 0.15);
+  background: rgba(90, 46, 5, 0.01);
+}
+
+.tome-title {
+  font-family: var(--font-mystic);
+  font-size: 1.6rem;
+  color: #5a2e05;
+  margin-bottom: 25px;
+  border-bottom: 2px double rgba(90, 46, 5, 0.25);
+  padding-bottom: 10px;
+  width: 100%;
+  letter-spacing: 1px;
+}
+
+.tome-stats {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  width: 100%;
+  justify-content: center;
+}
+
+.tome-stat-item {
+  background: rgba(90, 46, 5, 0.04);
+  border: 1px dashed rgba(90, 46, 5, 0.2);
+  border-radius: 8px;
+  padding: 12px 10px;
+  flex: 1;
+  max-width: 120px;
+}
+
+.tome-stat-num {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #8c001c;
+  font-family: var(--font-mystic);
+}
+
+.tome-stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #5e462f;
+  font-family: var(--font-sans);
+  font-weight: 600;
+}
+
+.tome-decoration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: auto;
+}
+
+.tome-motto {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #70563b;
+  max-width: 240px;
+  line-height: 1.5;
+}
+
+.tome-seal {
+  font-size: 2.2rem;
+  opacity: 0.85;
+  animation: floatLamp 4s ease-in-out infinite;
+}
+
+.tome-history-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.tome-history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-right: 5px;
+}
+
+.tome-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: #7b6348;
+  font-style: italic;
+  font-size: 0.95rem;
+  padding: 40px 20px;
+}
+
+/* Ink-written style for past wish entries in the tome */
+.tome-wish-item {
+  border-bottom: 1px dashed rgba(90, 46, 5, 0.18);
+  padding-bottom: 15px;
+  animation: fadeIn 0.4s ease forwards;
+  font-family: var(--font-sans);
+}
+
+.tome-wish-item:last-child {
+  border-bottom: none;
+}
+
+.tome-wish-text {
+  font-weight: 700;
+  color: #1a0f05;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+.tome-wish-text span {
+  color: #8c001c;
+  font-family: var(--font-mystic);
+  font-size: 0.75rem;
+}
+
+.tome-wish-outcome {
+  color: #4a3824;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.tome-wish-but {
+  color: #8c001c;
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border-left: 2px solid #8c001c;
+  padding-left: 10px;
+  margin-top: 8px;
+}
+
+/* Mobile responsive tome layout */
+@media (max-width: 768px) {
+  .tome-container {
+    height: 90vh;
+    width: 95%;
+  }
+  .tome-book {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .tome-book::after {
+    display: none;
+  }
+  .tome-page-left {
+    border-right: none;
+    border-bottom: 1px solid rgba(90, 46, 5, 0.15);
+    padding: 20px;
+  }
+  .tome-title {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+  .tome-stats {
+    margin-bottom: 10px;
+  }
+  .tome-decoration {
+    display: none;
+  }
+  .tome-page-right {
+    border-left: none;
+    padding: 20px;
+  }
+}
+
+/* Floating Book Button */
+.btn-tome {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 90;
+  background: linear-gradient(135deg, var(--primary-gold) 0%, #b8860b 100%);
+  color: #0e0717;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 14px 22px;
+  font-family: var(--font-mystic);
+  font-size: 0.9rem;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 5px 25px rgba(255, 215, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: floatLamp 4s ease-in-out infinite alternate;
+}
+
+.btn-tome:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+  background: linear-gradient(135deg, #fff275 0%, var(--primary-gold) 100%);
+}
+
+.btn-tome svg {
+  stroke: #0e0717;
+  stroke-width: 2.5px;
+}
+
+@media (max-width: 600px) {
+  .btn-tome {
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 16px;
+    font-size: 0.8rem;
+  }
 }
