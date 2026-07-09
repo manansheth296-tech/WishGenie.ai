@@ -370,7 +370,7 @@ class App {
   handleRub(e) {
     if (!this.isRubbing || this.state !== 'INTRO') return;
     
-    this.rubAmount += 0.4;
+    this.rubAmount += 2.0;
     this.rubProgressFill.style.width = `${Math.min(this.rubAmount, 100)}%`;
     
     // Spawn spark particles at cursor location
