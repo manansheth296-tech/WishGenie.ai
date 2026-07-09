@@ -191,6 +191,10 @@ header {
   animation: floatLamp 6s ease-in-out infinite;
   pointer-events: auto;
   cursor: grab;
+  user-drag: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .lamp-container.shaking .lamp-image {

@@ -323,6 +323,7 @@ class App {
     this.lampImage.addEventListener('touchstart', () => { this.isRubbing = true; this.sounds.init(); });
     window.addEventListener('touchend', () => { this.isRubbing = false; });
     this.lampImage.addEventListener('touchmove', (e) => this.handleRub(e.touches[0]));
+    this.lampImage.addEventListener('dragstart', (e) => e.preventDefault());
     
     // Cast Wish Event
     this.btnCast.addEventListener('click', () => this.castWish());
