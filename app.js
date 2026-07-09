@@ -284,6 +284,7 @@ class App {
     
     // Check if key is already saved to show indicator
     this.updateKeyIndicator();
+    this.loadHistory();
   }
 
   initDOM() {
@@ -665,8 +666,50 @@ Keep your responses dramatic, theatrical, and concise. Do not output anything ot
     });
   }
 
+  loadHistory() {
+    const saved = localStorage.getItem('wish_history');
+    this.wishes = saved ? JSON.parse(saved) : [];
+    
+    if (this.wishes.length > 0) {
+      this.tomeEmptyState.style.display = 'none';
+      this.tomeStatCount.textContent = this.wishes.length;
+      
+      const loopholeCount = this.wishes.filter(w => w.outcome.status === 'loophole').length;
+      this.tomeStatLoopholes.textContent = loopholeCount;
+      
+      this.tomeHistoryList.innerHTML = '';
+      this.wishes.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'tome-wish-item';
+        
+        if (item.outcome.status === 'perfect') {
+          li.style.borderColor = 'var(--primary-gold)';
+          li.innerHTML = `
+            <div class="tome-wish-text">✨ <span>Wish:</span> ${this.escapeHTML(item.wishText)}</div>
+            <div class="tome-wish-outcome" style="color:#5a2e05"><strong>Granted (Perfect):</strong> ${this.escapeHTML(item.outcome.granted)}</div>
+            <div class="tome-wish-outcome" style="font-style:italic; color:#70563b">"${this.escapeHTML(item.outcome.genie_commentary)}"</div>
+          `;
+        } else {
+          li.innerHTML = `
+            <div class="tome-wish-text">📜 <span>Wish:</span> ${this.escapeHTML(item.wishText)}</div>
+            <div class="tome-wish-outcome"><strong>Granted:</strong> ${this.escapeHTML(item.outcome.granted)}</div>
+            <div class="tome-wish-but"><strong>BUT:</strong> ${this.escapeHTML(item.outcome.but)}</div>
+            <div class="tome-wish-outcome" style="font-style:italic; font-size:0.85rem; color:#70563b;">"${this.escapeHTML(item.outcome.genie_commentary)}"</div>
+          `;
+        }
+        this.tomeHistoryList.insertBefore(li, this.tomeHistoryList.firstChild);
+      });
+    } else {
+      this.tomeEmptyState.style.display = 'flex';
+      this.tomeStatCount.textContent = '0';
+      this.tomeStatLoopholes.textContent = '0';
+      this.tomeHistoryList.innerHTML = '';
+    }
+  }
+
   addHistoryItem(wishText, outcome) {
     this.wishes.push({ wishText, outcome });
+    localStorage.setItem('wish_history', JSON.stringify(this.wishes));
     
     this.tomeEmptyState.style.display = 'none';
     this.tomeStatCount.textContent = this.wishes.length;
