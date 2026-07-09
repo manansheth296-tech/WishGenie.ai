@@ -251,6 +251,7 @@ header {
 }
 
 .genie-viewport {
+  width: 100%;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 20px;
@@ -475,6 +476,7 @@ header {
 
 /* Offering Area (Input Bar) */
 .offering-section {
+  width: 100%;
   grid-column: 1 / -1;
   display: flex;
   gap: 15px;
