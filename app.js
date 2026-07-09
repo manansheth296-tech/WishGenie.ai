@@ -285,6 +285,10 @@ class App {
     // Check if key is already saved to show indicator
     this.updateKeyIndicator();
     this.loadHistory();
+    
+    if (!this.apiKey) {
+      this.welcomeModal.classList.add('active');
+    }
   }
 
   initDOM() {
@@ -322,6 +326,11 @@ class App {
     this.butOverlay = document.querySelector('.but-overlay');
     this.smokeOverlay = document.querySelector('.smoke-overlay');
     
+    // Welcome Splash Elements
+    this.welcomeModal = document.getElementById('welcome-modal');
+    this.btnWelcomePlay = document.getElementById('btn-welcome-play');
+    this.btnWelcomeSettings = document.getElementById('btn-welcome-settings');
+    
     // Rub Events (Mouse & Touch)
     this.lampImage.addEventListener('mousedown', () => { this.isRubbing = true; this.sounds.init(); });
     window.addEventListener('mouseup', () => { this.isRubbing = false; });
@@ -353,7 +362,19 @@ class App {
       localStorage.setItem('gemini_api_key', this.apiKey);
       this.updateKeyIndicator();
       this.settingsModal.classList.remove('active');
-      this.showToast(this.apiKey ? "Gemini AI connection sealed!" : "Simulation Mode engaged.", "success");
+      this.showToast(this.apiKey ? "Genie AI connection sealed!" : "Simulation Mode engaged.", "success");
+    });
+    
+    // Welcome Splash Events
+    this.btnWelcomePlay.addEventListener('click', () => {
+      this.sounds.playClick();
+      this.welcomeModal.classList.remove('active');
+    });
+    
+    this.btnWelcomeSettings.addEventListener('click', () => {
+      this.sounds.playClick();
+      this.welcomeModal.classList.remove('active');
+      this.btnSettings.click();
     });
     
     // Prevent typing enter key submitting unless shift is held
