@@ -1,0 +1,14 @@
+# Windows thumbnail database files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# VS Code directory
+.vscode/
+
+# Local environment files (if any)
+.env
+.env.local
+.env.*.local
+*.log

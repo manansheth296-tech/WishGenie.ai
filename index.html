@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Tags -->
+  <title>Wish Genie AI - The Loophole Trap</title>
+  <meta name="description" content="A mischievous AI genie that grants your wishes literally, but with a catastrophic twist. Can you craft a bulletproof wish with no loopholes?">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Particle canvas for mystical ambiance -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Ambient glowing color patches in background -->
+  <div class="ambient-glow glow-purple"></div>
+  <div class="ambient-glow glow-gold"></div>
+
+  <!-- Global Application Shell -->
+  <div class="app-container">
+    
+    <header>
+      <div class="logo">WishGenie.ai</div>
+      <div style="display: flex; gap: 15px; align-items: center;">
+        <div id="api-status-indicator" style="font-size: 0.85rem;"></div>
+        <button id="btn-settings" class="btn-icon" title="Seal Gemini AI Key" aria-label="Settings">
+          <!-- Inline Gear SVG -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      
+      <!-- SCREEN 1: INTRO (SEALED LAMP) -->
+      <section id="intro-screen" class="screen active">
+        <div class="lamp-container">
+          <div class="lamp-glow"></div>
+          <img class="lamp-image" src="assets/lamp.jpg" alt="Mystical Magic Lamp">
+        </div>
+        <h1 class="mystic-prompt">Rub the Lamp to Awaken the Genie</h1>
+        <p class="mystic-subtitle">A cold metal vessel sits in the dark. Rub its gilded surface to break the cosmic seal and summon the arbiter of desires.</p>
+        
+        <div class="rub-progress-bar">
+          <div class="rub-progress-fill"></div>
+        </div>
+      </section>
+
+      <!-- SCREEN 2: DIALOG VIEW (AFTER SUMMONED) -->
+      <section id="dialog-screen" class="screen">
+        
+        <!-- Left: The Genie entity -->
+        <div class="genie-viewport">
+          <div class="genie-orb-container">
+            <div class="rune-ring"></div>
+            <div class="rune-ring-reverse"></div>
+            <div class="genie-orb"></div>
+          </div>
+          
+          <div class="genie-dialogue">
+            <div class="genie-name">The Genie</div>
+            <div id="genie-dialogue-text">Initializing cosmic presence...</div>
+          </div>
+          
+          <div class="genie-status-text" id="genie-status-text">Awaiting offering...</div>
+        </div>
+
+        <!-- Right: Tragedies history log -->
+        <div class="history-viewport">
+          <div class="history-header">
+            <span>The Book of Tragedies</span>
+            <span class="wish-counter"><span id="wish-count">0</span> Wishes</span>
+          </div>
+          
+          <ul class="history-list">
+            <!-- Dynamically populated wish items -->
+          </ul>
+          
+          <div class="history-empty">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+            <p>Your tragedies have not yet been written. Craft your offering below.</p>
+          </div>
+        </div>
+
+        <!-- Bottom: Input offering section -->
+        <div class="offering-section">
+          <div class="input-glow-wrapper">
+            <textarea class="offering-textarea" placeholder="Type your wish with absolute precision... e.g. I wish for a million dollars." aria-label="Your Wish"></textarea>
+          </div>
+          <button class="btn-cast" id="btn-cast">Cast Wish</button>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Searing BUT Overlay -->
+  <div class="but-overlay">
+    <div class="but-text">BUT...</div>
+  </div>
+
+  <!-- Smoke Overlay (Transition) -->
+  <div class="smoke-overlay">
+    <div class="smoke-text">SUMMONING COSMIC ENTITY...</div>
+  </div>
+
+  <!-- Settings Modal (Gemini API Input) -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Close modal">&times;</button>
+      <h2 class="modal-title">Seal the AI Core</h2>
+      
+      <div class="form-group">
+        <label for="api-key-input" class="form-label">Gemini API Key</label>
+        <input type="password" id="api-key-input" class="form-input" placeholder="AIzaSy...">
+        <p class="form-help">
+          Unlock dynamic, custom wishes and loophole detection using Google's <strong>Gemini 2.5 Flash</strong>. 
+          <br><br>
+          🔑 <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">Get a free API Key from Google AI Studio</a>. No credit card required.
+        </p>
+      </div>
+
+      <button id="btn-save-settings" class="btn-primary">Seal Connection</button>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js"></script>
+</body>
+</html>
