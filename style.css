@@ -238,11 +238,15 @@ header {
 
 /* Dialog Screen */
 #dialog-screen {
+  display: none;
   width: 100%;
-  display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 30px;
   align-items: stretch;
+}
+
+#dialog-screen.active {
+  display: grid;
 }
 
 @media (max-width: 868px) {
