@@ -106,11 +106,17 @@
       <div class="form-group">
         <label for="api-key-input" class="form-label">Gemini API Key</label>
         <input type="password" id="api-key-input" class="form-input" placeholder="AIzaSy...">
-        <p class="form-help">
-          Unlock dynamic, custom wishes and loophole detection using Google's <strong>Gemini 2.5 Flash</strong>. 
-          <br><br>
-          🔑 <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">Get a free API Key from Google AI Studio</a>. No credit card required.
-        </p>
+        <div class="form-help" style="margin-top: 12px; font-size: 0.85rem; line-height: 1.4; color: #a59bb5;">
+          <p><strong>Note:</strong> This app runs exclusively with Google's <strong>Gemini API</strong> (specifically optimized for Gemini 2.5 Flash).</p>
+          <p style="margin-top: 8px;"><strong>How to get your free key:</strong></p>
+          <ol style="margin-left: 15px; margin-top: 4px; padding-left: 5px;">
+            <li>Visit <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" style="color: var(--primary-gold); text-decoration: underline;">Google AI Studio</a>.</li>
+            <li>Sign in with any Google account.</li>
+            <li>Click the blue <strong>"Get API key"</strong> button.</li>
+            <li>Click <strong>"Create API key"</strong>, copy it, and paste it here!</li>
+          </ol>
+          <p style="margin-top: 8px; font-style: italic; color: #7c6f8f;">* Your key remains 100% private. It is saved locally in your browser and only communicates directly with Google's API.</p>
+        </div>
       </div>
 
       <button id="btn-save-settings" class="btn-primary">Seal Connection</button>
