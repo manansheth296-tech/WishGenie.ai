@@ -305,6 +305,9 @@ class App {
     this.genieState = 'idle'; // idle, searching, catastrophe, win
     
     this.apiKey = localStorage.getItem('gemini_api_key') || '';
+    this.elevenLabsKey = localStorage.getItem('elevenlabs_api_key') || '';
+    this.elevenLabsVoice = localStorage.getItem('elevenlabs_voice_id') || 'pNInz6obpgDQGcFmaJgB';
+    this.elevenAudioSource = null;
     
     this.initDOM();
     this.particles.start();
@@ -350,6 +353,8 @@ class App {
     this.settingsModal = document.getElementById('settings-modal');
     this.modalClose = document.querySelector('.modal-close');
     this.apiKeyInput = document.getElementById('api-key-input');
+    this.elevenLabsKeyInput = document.getElementById('elevenlabs-key-input');
+    this.elevenLabsVoiceInput = document.getElementById('elevenlabs-voice-input');
     this.butOverlay = document.querySelector('.but-overlay');
     this.smokeOverlay = document.querySelector('.smoke-overlay');
     
@@ -370,6 +375,8 @@ class App {
     this.btnSettings.addEventListener('click', () => {
       this.sounds.playClick();
       this.apiKeyInput.value = this.apiKey;
+      this.elevenLabsKeyInput.value = this.elevenLabsKey;
+      this.elevenLabsVoiceInput.value = this.elevenLabsVoice;
       this.settingsModal.classList.add('active');
     });
     
@@ -381,10 +388,14 @@ class App {
     this.btnSaveSettings.addEventListener('click', () => {
       this.sounds.playClick();
       this.apiKey = this.apiKeyInput.value.trim();
+      this.elevenLabsKey = this.elevenLabsKeyInput.value.trim();
+      this.elevenLabsVoice = this.elevenLabsVoiceInput.value.trim() || 'pNInz6obpgDQGcFmaJgB';
       localStorage.setItem('gemini_api_key', this.apiKey);
+      localStorage.setItem('elevenlabs_api_key', this.elevenLabsKey);
+      localStorage.setItem('elevenlabs_voice_id', this.elevenLabsVoice);
       this.updateKeyIndicator();
       this.settingsModal.classList.remove('active');
-      this.showToast(this.apiKey ? "Gemini AI connection sealed!" : "Simulation Mode engaged.", "success");
+      this.showToast(this.apiKey ? "Genie AI connection sealed!" : "Simulation Mode engaged.", "success");
     });
     
     // Prevent typing enter key submitting unless shift is held
@@ -410,11 +421,15 @@ class App {
 
   updateKeyIndicator() {
     const indicator = document.getElementById('api-status-indicator');
-    if (this.apiKey) {
-      indicator.innerHTML = '<span style="color:var(--primary-gold)">✨ AI Mode (Gemini Active)</span>';
-    } else {
-      indicator.innerHTML = '<span style="color:#7b6f8a">⚙️ Simulation Mode</span>';
+    let statusText = '⚙️ Simulation Mode';
+    if (this.apiKey && this.elevenLabsKey) {
+      statusText = '<span style="color:var(--primary-gold)">✨ AI Mode (Gemini & ElevenLabs Active)</span>';
+    } else if (this.apiKey) {
+      statusText = '<span style="color:var(--primary-gold)">✨ AI Mode (Gemini Active)</span>';
+    } else if (this.elevenLabsKey) {
+      statusText = '<span style="color:#7b6f8a">⚙️ Voice Mode (ElevenLabs Active)</span>';
     }
+    indicator.innerHTML = statusText;
   }
 
   handleRub(e) {
@@ -481,7 +496,57 @@ class App {
     this.typeDialogue("Ah, mortal... You have disturbed my slumber. What is it that you desire? Power? Wealth? A beautiful lie? Tell me your wish... if you dare.");
   }
 
-  speakGenie(text, onEndCallback) {
+  async speakGenie(text, onEndCallback) {
+    // 1. Try ElevenLabs photorealistic cinematic voice API if key is supplied
+    if (this.elevenLabsKey) {
+      try {
+        // Cancel any currently playing ElevenLabs audio stream
+        if (this.elevenAudioSource) {
+          try { this.elevenAudioSource.stop(); } catch (e) {}
+        }
+
+        const cleanText = text.replace(/[🔮✨📜🕯️❌BUT\.]/g, '').replace(/\n/g, ' ').trim();
+        
+        // Dynamically fetch user-defined or default Voice ID
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${this.elevenLabsVoice}?output_format=mp3_44100_128`, {
+          method: 'POST',
+          headers: {
+            'xi-api-key': this.elevenLabsKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            text: cleanText,
+            model_id: 'eleven_monolingual_v1',
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75
+            }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`ElevenLabs status ${response.status}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await this.sounds.ctx.decodeAudioData(arrayBuffer);
+
+        const source = this.sounds.ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(this.sounds.ctx.destination);
+        this.elevenAudioSource = source;
+
+        source.start(0);
+        source.onended = () => {
+          if (onEndCallback) onEndCallback();
+        };
+        return; // Success, exit method
+      } catch (err) {
+        console.warn("ElevenLabs TTS failed, falling back to local SpeechSynthesis:", err);
+      }
+    }
+
+    // 2. Fallback to local browser speech synthesis
     if ('speechSynthesis' in window) {
       // Cancel any current spoken utterances
       window.speechSynthesis.cancel();
