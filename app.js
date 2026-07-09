@@ -454,7 +454,7 @@ class App {
     this.typeDialogue("Ah, mortal... You have disturbed my slumber. What is it that you desire? Power? Wealth? A beautiful lie? Tell me your wish... if you dare.");
   }
 
-  speakGenie(text) {
+  speakGenie(text, onEndCallback) {
     if ('speechSynthesis' in window) {
       // Cancel any current spoken utterances
       window.speechSynthesis.cancel();
@@ -486,24 +486,68 @@ class App {
       utterance.pitch = 0.52; // range: 0 to 2, 0.5 is very deep
       utterance.rate = 0.82;  // range: 0.1 to 10, 0.8 is slow & theatrical
       
+      // Fallback timer to fire callback if speech gets stuck
+      let callbackFired = false;
+      const speechTimeout = setTimeout(() => {
+        if (!callbackFired && onEndCallback) {
+          callbackFired = true;
+          onEndCallback();
+        }
+      }, Math.max(3000, cleanText.length * 90)); // 90ms per character fallback
+
+      utterance.onend = () => {
+        clearTimeout(speechTimeout);
+        if (!callbackFired && onEndCallback) {
+          callbackFired = true;
+          onEndCallback();
+        }
+      };
+
+      utterance.onerror = () => {
+        clearTimeout(speechTimeout);
+        if (!callbackFired && onEndCallback) {
+          callbackFired = true;
+          onEndCallback();
+        }
+      };
+
       window.speechSynthesis.speak(utterance);
+    } else {
+      // If SpeechSynthesis is not supported, trigger callback after a default reading delay
+      if (onEndCallback) {
+        setTimeout(onEndCallback, 1800);
+      }
     }
   }
 
   typeDialogue(text, callback) {
-    this.speakGenie(text);
-    
     this.genieDialogueText.innerHTML = '';
+    let typewriterDone = false;
+    let speechDone = false;
+
+    const checkDone = () => {
+      if (typewriterDone && speechDone) {
+        if (callback) callback();
+      }
+    };
+
+    // Trigger speech synthesis and wait for completion
+    this.speakGenie(text, () => {
+      speechDone = true;
+      checkDone();
+    });
+    
+    // Trigger typewriter animation
     let i = 0;
     const speed = 25; // ms per char
-    
     const type = () => {
       if (i < text.length) {
         this.genieDialogueText.innerHTML += text.charAt(i);
         i++;
         setTimeout(type, speed);
-      } else if (callback) {
-        callback();
+      } else {
+        typewriterDone = true;
+        checkDone();
       }
     };
     
@@ -661,8 +705,9 @@ Keep your responses dramatic, theatrical, and concise. Do not output anything ot
 
   triggerCatastrophe(wish, outcome) {
     // 1. Reveal "Granted!"
+    // typeDialogue will now block until the speech synthesis finishes speaking the full "Granted! ..." sentence
     this.typeDialogue(`Granted! ${outcome.granted}`, () => {
-      // Wait a moment, then slam down the BUT
+      // Dramatic pause after speaking has completely finished
       setTimeout(() => {
         // Slam "BUT..." overlay
         this.butOverlay.style.display = 'flex';
@@ -689,7 +734,7 @@ Keep your responses dramatic, theatrical, and concise. Do not output anything ot
             setTimeout(() => this.setGenieState('idle'), 2000);
           });
         }, 1000);
-      }, 1500);
+      }, 800); // 800ms brief dramatic pause after speaking ends
     });
   }
 
