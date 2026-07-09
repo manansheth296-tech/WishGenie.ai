@@ -40,9 +40,8 @@
       
       <!-- SCREEN 1: INTRO (SEALED LAMP) -->
       <section id="intro-screen" class="screen active">
-        <div class="lamp-container">
+        <div class="lamp-container" id="lamp-3d-container">
           <div class="lamp-glow"></div>
-          <img class="lamp-image" src="assets/lamp.jpg" alt="Mystical Magic Lamp" draggable="false">
         </div>
         <h1 class="mystic-prompt">Rub the Lamp to Awaken the Genie</h1>
         <p class="mystic-subtitle">A cold metal vessel sits in the dark. Rub its gilded surface to break the cosmic seal and summon the arbiter of desires.</p>
@@ -173,6 +172,8 @@
   <!-- Toast Container -->
   <div id="toast-container" class="toast-container"></div>
 
+  <!-- Three.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <!-- Main JavaScript File -->
   <script src="app.js"></script>
 </body>

@@ -284,12 +284,13 @@ class App {
     
     // Check if key is already saved to show indicator
     this.updateKeyIndicator();
+    this.init3DScene();
   }
 
   initDOM() {
     // Buttons & Inputs
     this.lampContainer = document.querySelector('.lamp-container');
-    this.lampImage = document.querySelector('.lamp-image');
+    this.lamp3DContainer = document.getElementById('lamp-3d-container');
     this.rubProgressFill = document.querySelector('.rub-progress-fill');
     this.offeringTextarea = document.querySelector('.offering-textarea');
     this.btnCast = document.querySelector('.btn-cast');
@@ -321,15 +322,7 @@ class App {
     this.butOverlay = document.querySelector('.but-overlay');
     this.smokeOverlay = document.querySelector('.smoke-overlay');
     
-    // Rub Events (Mouse & Touch)
-    this.lampImage.addEventListener('mousedown', () => { this.isRubbing = true; this.sounds.init(); });
-    window.addEventListener('mouseup', () => { this.isRubbing = false; });
-    this.lampImage.addEventListener('mousemove', (e) => this.handleRub(e));
-    
-    this.lampImage.addEventListener('touchstart', () => { this.isRubbing = true; this.sounds.init(); });
-    window.addEventListener('touchend', () => { this.isRubbing = false; });
-    this.lampImage.addEventListener('touchmove', (e) => this.handleRub(e.touches[0]));
-    this.lampImage.addEventListener('dragstart', (e) => e.preventDefault());
+    // (Rubbing interactions are now handled dynamically in init3DScene via WebGL drag states)
     
     // Cast Wish Event
     this.btnCast.addEventListener('click', () => this.castWish());
@@ -385,26 +378,217 @@ class App {
     }
   }
 
-  handleRub(e) {
-    if (!this.isRubbing || this.state !== 'INTRO') return;
-    
-    this.rubAmount += 2.0;
-    this.rubProgressFill.style.width = `${Math.min(this.rubAmount, 100)}%`;
-    
-    // Spawn spark particles at cursor location
-    const rect = this.particles.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    this.particles.spawn(x, y, '#ffd700', 2);
-    
-    // Play rub sound at intervals
-    if (Math.random() < 0.15) {
-      this.sounds.playRub();
+  init3DScene() {
+    if (typeof THREE === 'undefined') {
+      console.error("Three.js library not loaded yet.");
+      return;
     }
+
+    const container = this.lamp3DContainer;
+    if (!container) return;
     
-    if (this.rubAmount >= 100) {
-      this.triggerSummoning();
-    }
+    // Scene & Camera
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+    camera.position.set(0, 0.5, 3.8);
+    camera.lookAt(0, 0, 0);
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(320, 320);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    // Lamp Group
+    const lampGroup = new THREE.Group();
+    scene.add(lampGroup);
+
+    // Gold Material
+    const goldMaterial = new THREE.MeshStandardMaterial({
+      color: 0xdfb43d,
+      metalness: 0.9,
+      roughness: 0.15
+    });
+
+    // 3D Lamp Components (Procedural shapes)
+    
+    // Body (Squashed wide sphere)
+    const bodyGeom = new THREE.SphereGeometry(0.55, 32, 32);
+    const body = new THREE.Mesh(bodyGeom, goldMaterial);
+    body.scale.set(1.4, 0.55, 1);
+    lampGroup.add(body);
+
+    // Base (Flared cylinder)
+    const baseGeom = new THREE.CylinderGeometry(0.35, 0.52, 0.16, 32);
+    const base = new THREE.Mesh(baseGeom, goldMaterial);
+    base.position.y = -0.52;
+    lampGroup.add(base);
+
+    // Neck (Narrow cylinder linking base to body)
+    const neckGeom = new THREE.CylinderGeometry(0.2, 0.25, 0.16, 32);
+    const neck = new THREE.Mesh(neckGeom, goldMaterial);
+    neck.position.y = -0.38;
+    lampGroup.add(neck);
+
+    // Spout (Slanted cylinder pointing right)
+    const spoutGeom = new THREE.CylinderGeometry(0.08, 0.18, 0.75, 32);
+    const spout = new THREE.Mesh(spoutGeom, goldMaterial);
+    spout.position.set(0.65, 0.15, 0);
+    spout.rotation.z = -Math.PI / 4.5;
+    lampGroup.add(spout);
+
+    // Spout Tip
+    const tipGeom = new THREE.CylinderGeometry(0.09, 0.08, 0.12, 32);
+    const tip = new THREE.Mesh(tipGeom, goldMaterial);
+    tip.position.set(0.92, 0.42, 0);
+    tip.rotation.z = -Math.PI / 4.5;
+    lampGroup.add(tip);
+
+    // Handle (Torus on the left)
+    const handleGeom = new THREE.TorusGeometry(0.22, 0.06, 16, 64, Math.PI * 1.4);
+    const handle = new THREE.Mesh(handleGeom, goldMaterial);
+    handle.position.set(-0.7, 0.1, 0);
+    handle.rotation.z = Math.PI / 1.6;
+    lampGroup.add(handle);
+
+    // Lid/Cap (Dome/Cone)
+    const lidGeom = new THREE.CylinderGeometry(0.01, 0.22, 0.22, 32);
+    const lid = new THREE.Mesh(lidGeom, goldMaterial);
+    lid.position.y = 0.38;
+    lampGroup.add(lid);
+
+    // Knob on Lid
+    const knobGeom = new THREE.SphereGeometry(0.05, 16, 16);
+    const knob = new THREE.Mesh(knobGeom, goldMaterial);
+    knob.position.y = 0.51;
+    lampGroup.add(knob);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0x3a215c, 2.0); // Purple tinted ambient light
+    scene.add(ambientLight);
+
+    const dirLight1 = new THREE.DirectionalLight(0xffdf85, 3.5); // Warm gold key light
+    dirLight1.position.set(5, 5, 5);
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0x7c4dff, 1.5); // Cool purple fill light
+    dirLight2.position.set(-5, 3, -5);
+    scene.add(dirLight2);
+
+    const magicLight = new THREE.PointLight(0x9b6dff, 5, 2.5); // Point light glowing at spout tip
+    magicLight.position.set(0.95, 0.45, 0);
+    scene.add(magicLight);
+
+    // Variables for interaction tracking
+    let isDragging = false;
+    let prevX = 0;
+    let prevY = 0;
+    let lastMoveTime = 0;
+
+    const startDrag = (x, y) => {
+      if (this.state !== 'INTRO') return;
+      isDragging = true;
+      prevX = x;
+      prevY = y;
+      this.isRubbing = true;
+      this.sounds.init();
+    };
+
+    const dragMove = (x, y, clientX, clientY) => {
+      if (!isDragging || this.state !== 'INTRO') return;
+
+      const deltaX = x - prevX;
+      const deltaY = y - prevY;
+      prevX = x;
+      prevY = y;
+
+      // Rotate group based on mouse movement
+      lampGroup.rotation.y += deltaX * 0.008;
+      lampGroup.rotation.x += deltaY * 0.008;
+      // Clamp X rotation to avoid flipping upside down
+      lampGroup.rotation.x = Math.max(-0.5, Math.min(0.5, lampGroup.rotation.x));
+
+      // Calculate speed of rub
+      const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      const now = Date.now();
+      const timeDelta = now - lastMoveTime;
+      lastMoveTime = now;
+
+      if (dist > 1) {
+        // Increment rub meter
+        this.rubAmount += dist * 0.15;
+        this.rubProgressFill.style.width = `${Math.min(this.rubAmount, 100)}%`;
+
+        // Spawn magical sparks at cursor position
+        const rect = this.particles.canvas.getBoundingClientRect();
+        const px = clientX - rect.left;
+        const py = clientY - rect.top;
+        this.particles.spawn(px, py, '#ffd700', 2);
+
+        // Randomly play rub hums
+        if (Math.random() < 0.18) {
+          this.sounds.playRub();
+        }
+
+        if (this.rubAmount >= 100) {
+          isDragging = false;
+          this.isRubbing = false;
+          this.triggerSummoning();
+        }
+      }
+    };
+
+    const stopDrag = () => {
+      isDragging = false;
+      this.isRubbing = false;
+    };
+
+    // Attach Event Listeners on the 3D container element
+    container.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e) => dragMove(e.clientX, e.clientY, e.clientX, e.clientY));
+    window.addEventListener('mouseup', stopDrag);
+
+    container.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      startDrag(t.clientX, t.clientY);
+    });
+    window.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      dragMove(t.clientX, t.clientY, t.clientX, t.clientY);
+    });
+    window.addEventListener('touchend', stopDrag);
+
+    // Prevent default touch scrolls on the canvas container
+    container.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+
+    // Animation Loop
+    const animate = () => {
+      if (this.state !== 'INTRO' && this.state !== 'SUMMONING') {
+        // Terminate WebGL render loop if we transition to dialog screen
+        renderer.dispose();
+        if (renderer.domElement.parentNode) {
+          renderer.domElement.parentNode.removeChild(renderer.domElement);
+        }
+        return;
+      }
+
+      this.lamp3DAnimId = requestAnimationFrame(animate);
+
+      // Idle animations (floating and gentle spin)
+      if (!isDragging) {
+        lampGroup.position.y = Math.sin(Date.now() * 0.0016) * 0.06;
+        lampGroup.rotation.y += 0.006;
+        // Restore X rotation slowly to level position
+        lampGroup.rotation.x *= 0.95;
+      }
+
+      // Pulse magic light intensity
+      magicLight.intensity = 4.0 + Math.sin(Date.now() * 0.01) * 1.5;
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
   }
 
   triggerSummoning() {
