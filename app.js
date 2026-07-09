@@ -284,6 +284,11 @@ class App {
     
     // Check if key is already saved to show indicator
     this.updateKeyIndicator();
+    
+    // Warm up speech synthesis voices
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+    }
   }
 
   initDOM() {
@@ -449,7 +454,45 @@ class App {
     this.typeDialogue("Ah, mortal... You have disturbed my slumber. What is it that you desire? Power? Wealth? A beautiful lie? Tell me your wish... if you dare.");
   }
 
+  speakGenie(text) {
+    if ('speechSynthesis' in window) {
+      // Cancel any current spoken utterances
+      window.speechSynthesis.cancel();
+      
+      // Clean text of custom UI symbols (emojis, etc.) before speaking
+      const cleanText = text.replace(/[🔮✨📜🕯️❌BUT\.]/g, '').replace(/\n/g, ' ').trim();
+      
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      const voices = window.speechSynthesis.getVoices();
+      
+      // Look for a deep/dramatic English voice (usually david, google, natural, or male)
+      let selectedVoice = voices.find(v => 
+        v.lang.startsWith('en') && 
+        (v.name.toLowerCase().includes('david') || 
+         v.name.toLowerCase().includes('google') ||
+         v.name.toLowerCase().includes('natural') || 
+         v.name.toLowerCase().includes('male'))
+      );
+      
+      if (!selectedVoice) {
+        selectedVoice = voices.find(v => v.lang.startsWith('en'));
+      }
+      
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+      
+      // Lower pitch and slow rate for a booming, mystical Genie voice effect
+      utterance.pitch = 0.52; // range: 0 to 2, 0.5 is very deep
+      utterance.rate = 0.82;  // range: 0.1 to 10, 0.8 is slow & theatrical
+      
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
   typeDialogue(text, callback) {
+    this.speakGenie(text);
+    
     this.genieDialogueText.innerHTML = '';
     let i = 0;
     const speed = 25; // ms per char
