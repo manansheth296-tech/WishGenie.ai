@@ -108,33 +108,60 @@ class SoundEngine {
     this.init();
     if (this.ctx.state === 'suspended') this.ctx.resume();
 
-    // Ascending shimmer
-    const duration = 2.5;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    const filter = this.ctx.createBiquadFilter();
+    const now = this.ctx.currentTime;
+    
+    // 1. Lush Ambient Pad (Warm low/mid tone that swells majestically)
+    const padOsc1 = this.ctx.createOscillator();
+    const padOsc2 = this.ctx.createOscillator();
+    const padGain = this.ctx.createGain();
+    const padFilter = this.ctx.createBiquadFilter();
 
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(100, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + duration);
+    padOsc1.type = 'triangle';
+    padOsc1.frequency.setValueAtTime(110, now); // A2 (warm root)
+    padOsc1.frequency.linearRampToValueAtTime(220, now + 2.5); // Gentle sweep
 
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(200, this.ctx.currentTime);
-    filter.frequency.exponentialRampToValueAtTime(3000, this.ctx.currentTime + duration);
+    padOsc2.type = 'sine';
+    padOsc2.frequency.setValueAtTime(165, now); // E3 (fifth)
+    
+    padFilter.type = 'lowpass';
+    padFilter.frequency.setValueAtTime(300, now);
+    padFilter.frequency.exponentialRampToValueAtTime(1000, now + 2.0);
 
-    gain.gain.setValueAtTime(0.01, this.ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.15, this.ctx.currentTime + duration - 0.2);
-    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+    padGain.gain.setValueAtTime(0.001, now);
+    padGain.gain.linearRampToValueAtTime(0.12, now + 1.8);
+    padGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
 
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.ctx.destination);
+    padOsc1.connect(padFilter);
+    padOsc2.connect(padFilter);
+    padFilter.connect(padGain);
+    padGain.connect(this.ctx.destination);
 
-    osc.start();
-    osc.stop(this.ctx.currentTime + duration);
+    padOsc1.start(now);
+    padOsc2.start(now);
+    padOsc1.stop(now + 3.0);
+    padOsc2.stop(now + 3.0);
 
-    // Deep sub drop
-    setTimeout(() => this.playCatastrophe(), (duration - 0.2) * 1000);
+    // 2. Ascending Magic Arpeggio (Uplifting Wind-Chime / Harp effect)
+    const notes = [220.00, 277.18, 329.63, 440.00, 554.37, 659.25, 880.00]; // A Major arpeggio notes
+    notes.forEach((freq, index) => {
+      const delay = index * 0.18; // Spaced arpeggio notes
+      
+      const chimeOsc = this.ctx.createOscillator();
+      const chimeGain = this.ctx.createGain();
+      
+      chimeOsc.type = 'triangle'; // Soft, warm, flute-like tone
+      chimeOsc.frequency.setValueAtTime(freq, now + delay);
+      
+      chimeGain.gain.setValueAtTime(0.001, now + delay);
+      chimeGain.gain.linearRampToValueAtTime(0.06, now + delay + 0.05);
+      chimeGain.gain.exponentialRampToValueAtTime(0.001, now + delay + 1.2);
+      
+      chimeOsc.connect(chimeGain);
+      chimeGain.connect(this.ctx.destination);
+      
+      chimeOsc.start(now + delay);
+      chimeOsc.stop(now + delay + 1.3);
+    });
   }
 
   playCatastrophe() {
