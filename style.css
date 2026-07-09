@@ -189,7 +189,8 @@ header {
   position: relative;
   filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
   animation: floatLamp 6s ease-in-out infinite;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: grab;
 }
 
 .lamp-container.shaking .lamp-image {

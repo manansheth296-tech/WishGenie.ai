@@ -289,6 +289,7 @@ class App {
   initDOM() {
     // Buttons & Inputs
     this.lampContainer = document.querySelector('.lamp-container');
+    this.lampImage = document.querySelector('.lamp-image');
     this.rubProgressFill = document.querySelector('.rub-progress-fill');
     this.offeringTextarea = document.querySelector('.offering-textarea');
     this.btnCast = document.querySelector('.btn-cast');
@@ -315,13 +316,13 @@ class App {
     this.smokeOverlay = document.querySelector('.smoke-overlay');
     
     // Rub Events (Mouse & Touch)
-    this.lampContainer.addEventListener('mousedown', () => { this.isRubbing = true; this.sounds.init(); });
+    this.lampImage.addEventListener('mousedown', () => { this.isRubbing = true; this.sounds.init(); });
     window.addEventListener('mouseup', () => { this.isRubbing = false; });
-    this.lampContainer.addEventListener('mousemove', (e) => this.handleRub(e));
+    this.lampImage.addEventListener('mousemove', (e) => this.handleRub(e));
     
-    this.lampContainer.addEventListener('touchstart', () => { this.isRubbing = true; this.sounds.init(); });
+    this.lampImage.addEventListener('touchstart', () => { this.isRubbing = true; this.sounds.init(); });
     window.addEventListener('touchend', () => { this.isRubbing = false; });
-    this.lampContainer.addEventListener('touchmove', (e) => this.handleRub(e.touches[0]));
+    this.lampImage.addEventListener('touchmove', (e) => this.handleRub(e.touches[0]));
     
     // Cast Wish Event
     this.btnCast.addEventListener('click', () => this.castWish());
